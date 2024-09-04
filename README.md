@@ -133,4 +133,7 @@ opencompass --datasets [name of the dataset] --hf-type chat \
 ```
  
  
-# Limitations for this release (MLC models are not compiled, pruned models are not fine-tuned, only 1 / 2 models submitted)
+# Limitations for this release
+MLC models are not compiled
+Pruned models are not fine-tuned
+Only 1 / 2 models submitted
