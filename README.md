@@ -122,7 +122,7 @@ To wrap the pruned model so that it is compatible with opencompass, we followed 
 3. Add ``example.py`` to the above folder which contains configuration of the wrapped model
 4. Insert ``from .mymodel import MyModel # noqa: F401`` to ``<env's site_packages dir>/opencompass/models/__init__.py`` for the created model to be identified
  
-## Running the tasks
+### Running the tasks
  
 Tasks on the wrapped model were run using the following code
 ```
