@@ -126,6 +126,7 @@ To wrap the pruned model so that it is compatible with opencompass, we followed 
  
 Tasks on the wrapped model were run using the following code
 ```
+# remove -r latest if reusing previous examples is not intended
 opencompass --datasets [name of the dataset] --hf-type chat \
 --models example --debug \
 --model-kwargs device_map='auto' trust_remote_code=True \
