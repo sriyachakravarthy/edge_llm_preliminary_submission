@@ -5,10 +5,10 @@ This repository has preliminary submission details for **Edge-Device Large Langu
 ## Name of the team and team members 
 ### Byte Crunchers
 - Chetan Singh Thakur
-- Madhu 
-- Arun 
-- Sriya 
-- Dhruva
+- Madhuvanthi Srivatsav R 
+- Arun C R 
+- Sriya R G  
+- Dhruva Kashyap
  
 ## Track chosen: Compression challenge
 ### Method/Strategy:
