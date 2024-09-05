@@ -4,12 +4,8 @@ models = [
     dict(
         type=Phi2Custom,
         # Parameters for `HuggingFaceCausalLM` initialization.
-        path='/rhome/sriyar/Atul/opencompass/phi-2-fp16',
+        path='/rhome/sriyar/Atul/opencompass/phi-2-fp16', #the path to the directory in which the model is loaded to
         tokenizer_path='microsoft/phi-2',
-        #max_seq_len=2048,
-        #batch_padding=False,
-        #peft_path='/rhome/sriyar/Sriya/LLM-Pruner/tune_log/tuned_llama',
-        # Common parameters shared by various models, not specific to `HuggingFaceCausalLM` initialization.
         abbr='example_phi2',            # Model abbreviation used for result display.
         max_out_len=256,            # Maximum number of generated tokens.
         batch_size=1,              # The size of a batch during inference.
