@@ -172,4 +172,12 @@ opencompass --datasets [name of the dataset] --hf-type chat \
 - **Operating System**: Ubuntu 22.04 LTS
 - **ROCm Version**: 5.7
 
+-The Throughput and memory evaluation numbers from obtained from Nvidia A100 GPU with the following specs:
+
+- CPU Configuration: AMD EPYC 7742 64-Core Processor    
+- System RAM: 512 GB
+- GPU Configuration: 4 x Nvidia A100 (40 GB)
+- Operating System: Ubuntu 22.04.4 LTS
+- CUDA Version: 12.4
+
 
