@@ -156,7 +156,7 @@ opencompass --datasets [name of the dataset] --hf-type chat \
 | HumanEval          | 31.1   |
 | CHID               | 12.29  |
 | TruthfulQA         | 0.18   |
-| Throughput         | 34.71      |
+| Throughput         | 34.66      |
 | Memory-Usage       | 6.534 GB      |
 
 #### Notes
