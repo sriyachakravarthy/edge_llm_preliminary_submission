@@ -18,94 +18,12 @@ This repository has preliminary submission details for [**Edge-Device Large Lang
    Structured pruning will be performed on the provided base models [Phi-2](https://huggingface.co/microsoft/phi-2), [Llama-3.1-8B-Instruct](https://huggingface.co/meta-llama/Meta-Llama-3.1-8B-Instruct) and   [Qwen2-7B-Instruct]. (https://huggingface.co/Qwen/Qwen2-7B-Instruct).
    We plan to utilize [LLM-Pruner](https://arxiv.org/abs/2305.11627) which adopts structural pruning that selectively removes non-critical coupled structures based on gradient information, maximally preserving the majority of the LLM's functionality.
  
-# Installing
-## Evaluation for CommonsenseQA, BIG-Bench Hard, GSM8K, LongBench, HumanEval, CHID, TruthfulQA Tasks
-### Open Evaluation Task
-The evaluation of CommonsenseQA, BIG-Bench Hard, GSM8K, HumanEval, CHID, and TruthfulQA is conducted using the OpenCompass tool.
-#### Environment setup
-
-```
-  conda create --name opencompass python=3.10 
-  conda activate opencompass
-  conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
-  pip install faiss-gpu
-
-  # Install from source 
-  git clone https://github.com/open-compass/opencompass opencompass
-  cd opencompass
-  git checkout 0.3.1
-  pip install -e .
-
-  # or with pip 
-  pip install opencompass==0.3.1
-
-  # Install human-eval
-  pip install git+https://github.com/open-compass/human-eval.git
-```
-#### Data Preparation(Option-1)
-
-If your environment cannot access the Internet, you can manually download the dataset.
-
-```
-# Download dataset to data/ folder
-wget https://github.com/open-compass/opencompass/releases/download/0.2.2.rc1/OpenCompassData-core-20240207.zip
-unzip OpenCompassData-core-20240207.zip
-```
-#### Data Preparation(Option-2)
-
-The OpenCompass will automatically download the datasets either from its own server or from HuggingFace.
 
 
-# Performance Evaluation Steps
-### GPU Memory Usage and Throughput Measurement
-```
-# Replace the model/tokenizer loader code with your code. DO NOT CHANGE THE HYPER-PARAMETER SETTING.
-python EvaluateThroughputAndMemory.py --model_name MODEL_NAME
-```
--- batch_size needs to be set to 1 and max_length needs to be set to 2K.
 
 
- 
-# Accuracy Evaluation steps
 
-### Evaluation Huggingface Models
 
-Example Evaluation with 1 gpu
-```
-CUDA_VISIBLE_DEVICES=0 \
-opencompass --datasets commonsenseqa_7shot_cot_gen_734a22 \ 
-  FewCLUE_chid_gen \ 
-  humaneval_gen \
-  bbh_gen \
-  gsm8k_gen \ 
-  truthfulqa_gen \
-  --hf-type chat \
-  --hf-path meta-llama/Meta-Llama-3.1-8B-Instruct \
-  --model-kwargs device_map='auto' trust_remote_code=True \
-  --max-out-len 1024 \
-  --debug \ 
-  -r latest # You can add --dry-run to auto-download the datasets first before your evaluation
-  # for Qwen2-7B-Instruct
-  # --hf-path Qwen/Qwen2-7B-Instruct
-
-```
-Example Evaluation with multiple gpus
-```
-opencompass --datasets commonsenseqa_7shot_cot_gen_734a22 \
-  FewCLUE_chid_gen \
-  humaneval_gen \
-  bbh_gen \
-  gsm8k_gen \
-  truthfulqa_gen \
-  --hf-type chat \
-  --hf-path meta-llama/Meta-Llama-3.1-8B-Instruct \
-  --model-kwargs device_map='auto' trust_remote_code=True \
-  --max-num-workers 8 \ ## Change this number based on number of gpus 
-  --max-out-len 1024 \
-  -r latest
-  # for Qwen2-7B-Instruct
-  # --hf-path Qwen/Qwen2-7B-Instruct
-```
 
 ### Evaluate local models
 
