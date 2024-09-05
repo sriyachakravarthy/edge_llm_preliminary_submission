@@ -140,3 +140,32 @@ opencompass --datasets [name of the dataset] --hf-type chat \
 2. The above model is pending MLC compilation and will be submitted in a future submission 
 3. Other two model submissions are a work in progress
 
+## Preliminary Results for phi-2
+
+### Evaluation Results Summary (5/9/24)
+
+| Metric             | Result |
+|--------------------|--------|
+| CommonsenseQA      | 19.57  |
+| BIG-Bench-Hard     | 0      |
+| GSM8K              | 0      |
+| HumanEval          | 31.1   |
+| CHID               | 12.29  |
+| TruthfulQA         | 0.18   |
+| Throughput         | 0      |
+| Memory-Usage       | 0      |
+
+#### Notes
+
+- hftype chat was used while generating results with batch size 1 and max output length 1024.
+
+#### System Configuration
+
+- **CPU Configuration**: 2P 96C Genoa AMD CPU
+- **System RAM**: 1.5 TB
+- **System Storage**: 48 TB
+- **GPU Configuration**: 4 x AMD MI210 (64 GB)
+- **Operating System**: Ubuntu 22.04 LTS
+- **ROCm Version**: 5.7
+
+
