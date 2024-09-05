@@ -4,7 +4,7 @@
 This repository has preliminary submission details for [**Edge-Device Large Language Model Competition**](https://github.com/TianjinYellow/EdgeDeviceLLMCompetition-Starting-Kit).
 ## Name of the team and team members 
 ### Byte Crunchers
-- Chetan Singh Thakur
+- Prof. Chetan Singh Thakur
 - Madhuvanthi Srivatsav R 
 - Arun C R 
 - Sriya R G  
