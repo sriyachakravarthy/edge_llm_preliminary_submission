@@ -1,14 +1,2 @@
-Evaluation Results Summary for phi-2
-
 CommonsenseQA,BIG-Bench-Hard,GSM8K,HumanEval,CHID,TruthfulQA,Throughput,Memory-Usage
 19.57,0,0,31.1,12.29,0.18,0,0
-
-
-Note: hftype chat was used while generating results with batch size 1 and max output length 1024.
-System Configuration:
-• CPU Configuration: 2P 96C Genoa AMD CPU
-• System RAM: 1.5 TB
-• System Storage: 48 TB
-• GPU Configuration: 4 x AMD MI210 (64 GB)
-• Operating System: Ubuntu 22.04 LTS
-• ROCm Version: 5.7
