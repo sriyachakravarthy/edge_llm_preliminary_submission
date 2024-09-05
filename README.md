@@ -38,7 +38,7 @@ NOTE: The path of the saved model weights needs to specified in this configurati
  
 To wrap the local model so that it is compatible with opencompass, we followed the steps provided in [opencompass](https://opencompass.readthedocs.io/en/latest/advanced_guides/new_model.html)
  
-1. Download phi-2 model in fp16 format using code provided in source_code folder and save it `sav_dir`
+1. Download phi-2 model in fp16 format using code provided in source_code folder and save it in `sav_dir`
 2. Download Opencompass_model.py as phi2custom.py ``phi2custom.py`` and place it in opencompass/opencompass/models directory
 3. Add a directory named `example_phi2` in ``/opencompass/configs/models`` 
 4. Download Configuration_opencompass.py as ``example_phi2.py`` and copy it to the `example_phi2` folder which contains configuration of the wrapped model
