@@ -129,7 +129,7 @@ Tasks on the wrapped model were run using the following code
 ```
 # remove -r latest if reusing previous examples is not intended
 opencompass --datasets [name of the dataset] --hf-type chat \
---models example --debug \
+--models example_phi2 --debug \
 --model-kwargs device_map='auto' trust_remote_code=True \
 --batch-size 1 -r latest --max-out-len 1024 --max-num-workers 2
 ```
