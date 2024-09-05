@@ -11,12 +11,12 @@ This repository has preliminary submission details for [**Edge-Device Large Lang
 - Dhruva Kashyap
  
 ## Track chosen: Compression challenge
-### Method/Strategy:
+### Strategy:
 #### For preliminary Submission:
 Download model [Phi-2](https://huggingface.co/microsoft/phi-2) in fp16 format locally and wrap it for evaluation compatibility.
 #### Strategy for final submission:
-Structured pruning was performed on the provided base models [Phi-2](https://huggingface.co/microsoft/phi-2), [Llama-3.1-8B-Instruct](https://huggingface.co/meta-llama/Meta-Llama-3.1-8B-Instruct) and [Qwen2-7B-Instruct]. (https://huggingface.co/Qwen/Qwen2-7B-Instruct).
-[LLM-Pruner](https://arxiv.org/abs/2305.11627) adopts structural pruning that selectively removes non-critical coupled structures based on gradient information, maximally preserving the majority of the LLM's functionality.
+Structured pruning will be performed on the provided base models [Phi-2](https://huggingface.co/microsoft/phi-2), [Llama-3.1-8B-Instruct](https://huggingface.co/meta-llama/Meta-Llama-3.1-8B-Instruct) and [Qwen2-7B-Instruct]. (https://huggingface.co/Qwen/Qwen2-7B-Instruct).
+We plan to utilize [LLM-Pruner](https://arxiv.org/abs/2305.11627) which adopts structural pruning that selectively removes non-critical coupled structures based on gradient information, maximally preserving the majority of the LLM's functionality.
  
 # Installing
 ## Evaluation for CommonsenseQA, BIG-Bench Hard, GSM8K, LongBench, HumanEval, CHID, TruthfulQA Tasks
