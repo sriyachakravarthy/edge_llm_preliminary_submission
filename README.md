@@ -38,12 +38,12 @@ NOTE: The path of the saved model weights needs to specified in this configurati
  
 To wrap the local model so that it is compatible with opencompass, we followed the steps provided in [opencompass](https://opencompass.readthedocs.io/en/latest/advanced_guides/new_model.html)
  
-1. Download phi-2 model in fp16 format using code provided in source_code folder
-2. Download Opencompass_model.py as phi2custom.py ``phi2custom.py`` to  ``<env's site_packages dir>/opencompass/models`` directory
-3. Add a directory named `example_phi2` in ``<env's site_packages dir/opencompass/configs/models`` 
-4. Download Configuration_opencompass.py as ``example_phi2.py`` to the above folder which contains configuration of the wrapped model
-5. Make sure that the 'save_dir' in step1 is set as path in example_phi2.py
-6. Insert ``from .phi2custom import Phi2Custom # noqa: F401`` to ``<env's site_packages dir>/opencompass/models/__init__.py`` for the created model to be identified
+1. Download phi-2 model in fp16 format using code provided in source_code folder and save it `sav_dir`
+2. Download Opencompass_model.py as phi2custom.py ``phi2custom.py`` and place it in opencompass/opencompass/models directory
+3. Add a directory named `example_phi2` in ``/opencompass/configs/models`` 
+4. Download Configuration_opencompass.py as ``example_phi2.py`` and copy it to the `example_phi2` folder which contains configuration of the wrapped model
+5. Make sure that the path of the 'save_dir' in step1 is set as path in example_phi2.py
+6. Insert ``from .phi2custom import Phi2Custom`` to ``/opencompass/models/__init__.py`` for the created model to be identified
  
 ### Running the tasks
  
