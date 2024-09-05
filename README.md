@@ -80,6 +80,7 @@ opencompass --datasets [name of the dataset] --hf-type chat \
 #### Notes
 
 - hftype chat was used while generating results with batch size 1 and max output length 1024.
+- Fine-tuning is not done yet. So the accuracy numbers need to be improved. 
 
 #### System Configuration
 
