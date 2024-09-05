@@ -115,12 +115,13 @@ NOTE: The path of the saved model weights needs to specified in this configurati
 -- The prepared configuration file needs be placed under the folder: /opencompass/configs. 
 ## Wrapper creation and usage
  
-To wrap the pruned model so that it is compatible with opencompass, we followed the steps provided in [opencompass](https://opencompass.readthedocs.io/en/latest/advanced_guides/new_model.html)
+To wrap the local model so that it is compatible with opencompass, we followed the steps provided in [opencompass](https://opencompass.readthedocs.io/en/latest/advanced_guides/new_model.html)
  
-1. Add ``mymodel.py`` to  ``<env's site_packages dir>/opencompass/models`` directory
-2. Add a directory named `example` in ``<env's site_packages dir/opencompass/configs/models`` 
-3. Add ``example.py`` to the above folder which contains configuration of the wrapped model
-4. Insert ``from .mymodel import MyModel # noqa: F401`` to ``<env's site_packages dir>/opencompass/models/__init__.py`` for the created model to be identified
+1. Download phi-2 model in fp16 format
+2. Add ``phi2custom.py`` to  ``<env's site_packages dir>/opencompass/models`` directory
+3. Add a directory named `example_phi2` in ``<env's site_packages dir/opencompass/configs/models`` 
+4. Add ``example_phi2.py`` to the above folder which contains configuration of the wrapped model
+5. Insert ``from .phi2custom import Phi2Custom # noqa: F401`` to ``<env's site_packages dir>/opencompass/models/__init__.py`` for the created model to be identified
  
 ### Running the tasks
  
@@ -134,7 +135,8 @@ opencompass --datasets [name of the dataset] --hf-type chat \
 ```
  
  
-# Limitations for this release
-MLC models are not compiled
-Pruned models are not fine-tuned
-Only 1 / 2 models submitted
+# Submission status as of 5/9/24
+1. Phi-2 model (fp16) has been evaluated locally and submitted.
+2. The above model is pending MLC compilation and will be submitted in a future submission 
+3. Other two model submissions are a work in progress
+
