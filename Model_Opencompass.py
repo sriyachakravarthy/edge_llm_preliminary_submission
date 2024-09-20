@@ -14,9 +14,36 @@ from opencompass.utils.prompt import PromptList
 PromptType = Union[PromptList, str]
 
 
+class MultiTokenEOSCriteria(transformers.StoppingCriteria):
+    """Criteria to stop on the specified multi-token sequence."""
+
+    def __init__(
+        self,
+        sequence: str,
+        tokenizer: transformers.PreTrainedTokenizer,
+        batch_size: int,
+    ):
+        self.done_tracker = [False] * batch_size
+        self.sequence = sequence
+        self.sequence_ids = tokenizer.encode(sequence,
+                                             add_special_tokens=False)
+        self.sequence_id_len = len(self.sequence_ids)
+        self.tokenizer = tokenizer
+
+    def __call__(self, input_ids, scores, **kwargs) -> bool:
+        # compare the last len(stop) tokens
+        lookback_ids_batch = input_ids[:, -self.sequence_id_len:]
+        lookback_tokens_batch = self.tokenizer.batch_decode(lookback_ids_batch)
+        for i, done in enumerate(self.done_tracker):
+            if done:
+                continue
+            self.done_tracker[i] = self.sequence in lookback_tokens_batch[i]
+        return False not in self.done_tracker
+
+
 @MODELS.register_module()
-class Phi2Custom(BaseModel):
-    """Model wrapper around HuggingFace models.
+class HuggingFacePhi2(BaseModel):
+    """Model wrapper around local Phi2.
 
     Args:
         path (str): The name or path to HuggingFace's model.
@@ -63,7 +90,7 @@ class Phi2Custom(BaseModel):
 
     def __init__(self,
                  path: str,
-                 #hf_cache_dir: Optional[str] = None,
+                 hf_cache_dir: Optional[str] = None,
                  max_seq_len: int = 2048,
                  tokenizer_path: Optional[str] = None,
                  tokenizer_kwargs: dict = dict(),
@@ -82,8 +109,8 @@ class Phi2Custom(BaseModel):
                          max_seq_len=max_seq_len,
                          tokenizer_only=tokenizer_only,
                          meta_template=meta_template)
-    # if hf_cache_dir is None:
-           # hf_cache_dir = os.getenv('HF_MODEL_HUB', None)
+        if hf_cache_dir is None:
+            hf_cache_dir = os.getenv('HF_MODEL_HUB', None)
         self.logger = get_logger()
         self.pad_token_id = pad_token_id
         assert mode in ['none', 'mid']
@@ -103,13 +130,10 @@ class Phi2Custom(BaseModel):
 
     def _load_tokenizer(self, path: str, tokenizer_path: Optional[str],
                         tokenizer_kwargs: dict):
-
-          #  tokenizer_path if tokenizer_path else path, **tokenizer_kwargs)
         from transformers import AutoTokenizer
-        import os
-        os.environ["TOKENIZERS_PARALLELISM"] = "false"
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            tokenizer_path if tokenizer_path else path, **tokenizer_kwargs)
 
-        self.tokenizer=AutoTokenizer.from_pretrained('microsoft/phi-2', use_fast=True)
         # A patch for some models without pad_token_id
         if self.pad_token_id is not None:
             if self.pad_token_id < 0:
@@ -173,20 +197,22 @@ class Phi2Custom(BaseModel):
                     path: str,
                     model_kwargs: dict,
                     peft_path: Optional[str] = None):
-        from transformers import AutoModelForCausalLM
+        from transformers import AutoModel, AutoModelForCausalLM
 
         self._set_model_kwargs_torch_dtype(model_kwargs)
+        try:
+            self.model = AutoModelForCausalLM.from_pretrained(
+                path, **model_kwargs)
+        except ValueError:
+            self.model = AutoModel.from_pretrained(path, **model_kwargs)
 
-        self.model = AutoModelForCausalLM.from_pretrained(path)
-     
-        self.model.cuda()
+        if peft_path is not None:
+            from peft import PeftModel
+            self.model = PeftModel.from_pretrained(self.model,
+                                                   peft_path,
+                                                   is_trainable=False)
         self.model.eval()
         self.model.generation_config.do_sample = False
-        from transformers import AutoTokenizer
-        self.tokenizer=AutoTokenizer.from_pretrained('microsoft/phi-2', use_fast=True)
-        import os
-        os.environ["TOKENIZERS_PARALLELISM"] = "false"
-
 
         # A patch for llama when batch_padding = True
         if 'decapoda-research/llama' in path:
@@ -210,7 +236,6 @@ class Phi2Custom(BaseModel):
         Returns:
             List[str]: A list of generated strings.
         """
-     
         generation_kwargs = kwargs.copy()
         generation_kwargs.update(self.generation_kwargs)
         if self.batch_padding and len(inputs) > 1:
@@ -344,7 +369,7 @@ class Phi2Custom(BaseModel):
             inputs = [conv.get_prompt()]
 
         if self.mode == 'mid':
-            input_ids = self.tokenizer(inputs, truncation=True)['input_ids']
+            input_ids = self.tokenizer(inputs, truncation=False)['input_ids']
             input_ids = torch.tensor(input_ids, device=self.model.device)
             if len(input_ids[0]) > self.max_seq_len - max_out_len:
                 half = int((self.max_seq_len - max_out_len) / 2)
@@ -357,8 +382,8 @@ class Phi2Custom(BaseModel):
 
         input_ids = self.tokenizer(inputs,
                                    truncation=True,
-                                   max_length=max_out_len#self.max_seq_len -
-                                   )['input_ids']
+                                   max_length=self.max_seq_len -
+                                   max_out_len)['input_ids']
         input_ids = torch.tensor(input_ids, device=self.model.device)
         origin_stopping_criteria = stopping_criteria
         if stopping_criteria:
@@ -381,28 +406,13 @@ class Phi2Custom(BaseModel):
 
         # To accommodate the PeftModel, parameters should be passed in
         # key-value format for generate.
-        '''
         outputs = self.model.generate(input_ids=input_ids,
                                       max_new_tokens=max_out_len,
                                       **kwargs)
 
         if not self.extract_pred_after_decode:
-            outputs = outputs[:, input_ids.shape[1]:]'''
-        with torch.no_grad():
-            generation_output = self.model.generate(
-                input_ids=input_ids,
-                do_sample=True,
-                top_k=50,
-                top_p=0.75,
-                temperature=0.1,
-                max_new_tokens=max_out_len,
-                return_dict_in_generate=True,
-                pad_token_id=self.tokenizer.pad_token_id, 
-                eos_token_id=self.tokenizer.eos_token_id
-            )
-        outputs = generation_output.sequences
-        if not self.extract_pred_after_decode:
             outputs = outputs[:, input_ids.shape[1]:]
+
         decodeds = self.tokenizer.batch_decode(outputs,
                                                skip_special_tokens=True)
 
@@ -633,3 +643,145 @@ class Phi2Custom(BaseModel):
         """
         return len(self.tokenizer.encode(prompt))
 
+
+@MODELS.register_module()
+class Phi2Custom(HuggingFacePhi2):
+    """Model wrapper around Phi2.
+
+    Args:
+        path (str): The name or path to HuggingFace's model.
+        hf_cache_dir: Set the cache dir to HF model cache dir. If None, it will
+            use the env variable HF_MODEL_HUB. Defaults to None.
+        max_seq_len (int): The maximum length of the input sequence. Defaults
+            to 2048.
+        tokenizer_path (str): The path to the tokenizer. Defaults to None.
+        tokenizer_kwargs (dict): Keyword arguments for the tokenizer.
+            Defaults to {}.
+        peft_path (str, optional): The name or path to the HuggingFace's PEFT
+            model. If None, the original model will not be converted to PEFT.
+            Defaults to None.
+        tokenizer_only (bool): If True, only the tokenizer will be initialized.
+            Defaults to False.
+        model_kwargs (dict): Keyword arguments for the model, used in loader.
+            Defaults to dict(device_map='auto').
+        meta_template (Dict, optional): The model's meta prompt
+            template if needed, in case the requirement of injecting or
+            wrapping of any meta instructions.
+        batch_padding (bool): If False, inference with be performed in for-loop
+            without batch padding.
+    """
+
+    def _load_model(self,
+                    path: str,
+                    model_kwargs: dict,
+                    peft_path: Optional[str] = None):
+        from transformers import AutoModelForCausalLM
+
+        self._set_model_kwargs_torch_dtype(model_kwargs)
+        self.model = AutoModelForCausalLM.from_pretrained(path, **model_kwargs)
+        if peft_path is not None:
+            from peft import PeftModel
+            self.model = PeftModel.from_pretrained(self.model,
+                                                   peft_path,
+                                                   is_trainable=False)
+        self.model.eval()
+        self.model.generation_config.do_sample = False
+
+
+class HuggingFaceChatGLM3Phi2(HuggingFacePhi2):
+
+
+    def __init__(self,
+                 path: str,
+                 hf_cache_dir: Optional[str] = None,
+                 max_seq_len: int = 2048,
+                 tokenizer_path: Optional[str] = None,
+                 tokenizer_kwargs: dict = dict(),
+                 peft_path: Optional[str] = None,
+                 tokenizer_only: bool = False,
+                 model_kwargs: dict = dict(device_map='auto'),
+                 generation_kwargs: dict = dict(),
+                 meta_template: Optional[Dict] = None,
+                 extract_pred_after_decode: bool = False,
+                 batch_padding: bool = False,
+                 pad_token_id: Optional[int] = None,
+                 mode: str = 'none',
+                 num_extra_tokens: int = 50):
+        super().__init__(path=path,
+                         hf_cache_dir=hf_cache_dir,
+                         max_seq_len=max_seq_len,
+                         tokenizer_path=tokenizer_path,
+                         tokenizer_kwargs=tokenizer_kwargs,
+                         peft_path=peft_path,
+                         tokenizer_only=tokenizer_only,
+                         generation_kwargs=generation_kwargs,
+                         model_kwargs=model_kwargs,
+                         meta_template=meta_template,
+                         extract_pred_after_decode=extract_pred_after_decode,
+                         batch_padding=batch_padding,
+                         pad_token_id=pad_token_id,
+                         mode=mode)
+        self.template_parser = APITemplateParser(meta_template)
+        # used to compensate for #tokens occupied by sth like system prompt
+        self.num_extra_tokens = num_extra_tokens
+
+    def generate(self,
+                 inputs: List[PromptType],
+                 max_out_len: int = 512,
+                 skip_overlength=False,
+                 **kwargs) -> str:
+        """Generate response from input prompt.
+
+        Args:
+            inputs (list): input prompt
+            max_out_len (int): max output length
+        """
+        generation_kwargs = kwargs.copy()
+        generation_kwargs.update(self.generation_kwargs)
+
+        responses = []
+        for _input in inputs:
+            assert isinstance(_input, (str, PromptList))
+            if isinstance(_input, str):
+                history = [{'role': 'user', 'content': _input}]
+            else:
+                history = []
+                for item in _input:
+                    msg = {
+                        'content': item['prompt'],
+                        'role': {
+                            'HUMAN': 'user',
+                            'BOT': 'assistant',
+                            'SYSTEM': 'system',
+                        }[item['role'].upper()]
+                    }
+                    history.append(msg)
+            user_content = history[-1]['content']
+            history = history[:-1]
+
+            if skip_overlength:
+                # The model will report the following error
+                # if the sequence length is greater than the maximum length:
+                # "Input length of input_ids is {INPUT_IDS},
+                # but `max_length` is set to 8192.
+                # This can lead to unexpected behavior.
+                # You should consider increasing `max_new_tokens`."
+                # The following hardcode can fix this exception.
+                len_user_content = len(self.tokenizer.encode(user_content))
+                if len_user_content > 8192:
+                    responses.append('')
+                    continue
+
+            response, history = self.model.chat(self.tokenizer,
+                                                user_content,
+                                                history=history,
+                                                max_new_tokens=max_out_len,
+                                                **generation_kwargs)
+            # response will be dict sometime
+            if isinstance(response, dict):
+                response = response.get('content', '')
+            responses.append(response)
+        return responses
+
+    def get_token_len(self, prompt: str) -> int:
+        return len(self.tokenizer.encode(prompt)) + self.num_extra_tokens
