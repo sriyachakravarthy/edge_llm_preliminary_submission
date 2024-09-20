@@ -66,11 +66,12 @@ opencompass --datasets [name of the dataset] --hf-type chat \
 
 ### Evaluation Results Summary (5/9/24)
 
+
 | Metric             | Result |
 |--------------------|--------|
-| CommonsenseQA      | 19.57  |
-| BIG-Bench-Hard     | work in progress      |
-| GSM8K              | work in progress      |
+| CommonsenseQA      | 65.68 |
+| BIG-Bench-Hard     | 59.4  |
+| GSM8K              | 61.56 |
 | HumanEval          | 31.1   |
 | CHID               | 12.29  |
 | TruthfulQA         | 0.18   |
@@ -80,7 +81,6 @@ opencompass --datasets [name of the dataset] --hf-type chat \
 #### Notes
 
 - hftype chat was used while generating results with batch size 1 and max output length 1024.
-- GSM8K and BBH-Gen datasets take a long time evaluate, so we couldnt get the accuracy numbers in time.
 - We require the following feedback:
 -   1. Do the throughput and memory numbers obtained from our hardware consistent with your results ?
     2. Is our wrapper and configuration file compatible with the pipeline ?
