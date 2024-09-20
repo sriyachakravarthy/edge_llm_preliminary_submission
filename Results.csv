@@ -1,2 +1,7 @@
 CommonsenseQA,BIG-Bench-Hard,GSM8K,HumanEval,CHID,TruthfulQA,Throughput,Memory-Usage
-19.57,0,0,31.1,12.29,0.18,34.66 inf/s,6.534 GB
+65.68,59.4,61.56,31.1,12.29,0.18,34.66 inf/s,6.534 GB
+ 
+
+
+
+
